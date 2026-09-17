@@ -462,6 +462,40 @@ TEST(engine_dump_smoke) {
     engine_free(&e);
 }
 
+TEST(engine_inspection_api) {
+    Engine e;
+    engine_init(&e, STRATEGY_ORDER);
+
+    /* Initially not refracted */
+    ASSERT(!engine_is_rule_refracted(&e, "rule1", 1));
+
+    wm_assert(&e.wm, "a", value_int(10));
+    Rule *r1 = rule_create("rule1", 0);
+    rule_add_condition(r1, "a", OP_EQ, value_int(10));
+    rule_add_action(r1, ACT_ASSERT, "b", value_int(20));
+    rb_add_rule(&e.rb, r1);
+
+    Rule *r2 = rule_create("rule2", 5);
+    rule_add_condition(r2, "a", OP_EQ, value_int(10));
+    rule_add_action(r2, ACT_ASSERT, "c", value_int(30));
+    rb_add_rule(&e.rb, r2);
+
+    /* Test engine_rule_beats */
+    ASSERT(engine_rule_beats(r1, 0, 1, r2, 1, 1, STRATEGY_ORDER));
+    ASSERT(engine_rule_beats(r2, 1, 1, r1, 0, 1, STRATEGY_SALIENCE));
+
+    /* Fire one step */
+    EngineStepResult res = engine_step(&e);
+    ASSERT_EQ_INT(res, ENGINE_STEP_FIRED);
+
+    /* rule1 has fired for tick 1 */
+    ASSERT(engine_is_rule_refracted(&e, "rule1", 1));
+    /* But if tick increases to 2, it is not refracted */
+    ASSERT(!engine_is_rule_refracted(&e, "rule1", 2));
+
+    engine_free(&e);
+}
+
 int main(void) {
     printf("Starting Syllogist Inference Engine & Pluggable I/O Tests...\n\n");
 
@@ -478,6 +512,8 @@ int main(void) {
     RUN_TEST(io_mock_standalone_operations);
     RUN_TEST(io_console_action_sink_smoke);
     RUN_TEST(engine_dump_smoke);
+    RUN_TEST(engine_inspection_api);
 
     return TEST_RUNNER_SUMMARY();
 }
+

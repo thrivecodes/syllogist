@@ -59,8 +59,12 @@ void engine_set_action_sink(Engine *e, ActionSinkFn sink, void *user_data);
 EngineStepResult engine_step(Engine *e);
 EngineStepResult engine_run(Engine *e);
 
-/* Diagnostics */
+/* Diagnostics and Inspection */
 void engine_dump(const Engine *e, FILE *out);
+bool engine_is_rule_refracted(const Engine *e, const char *rule_name, uint64_t match_ts);
+bool engine_rule_beats(const Rule *cand, size_t cand_order, uint64_t cand_ts,
+                       const Rule *best, size_t best_order, uint64_t best_ts,
+                       ConflictStrategy strategy);
 
 #ifdef __cplusplus
 }

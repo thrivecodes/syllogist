@@ -1,23 +1,8 @@
 #include "fact.h"
+#include "util.h"
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-
-static char *safe_strdup(const char *s) {
-    if (!s) {
-        char *empty = (char *)malloc(1);
-        if (empty) {
-            empty[0] = '\0';
-        }
-        return empty;
-    }
-    size_t len = strlen(s);
-    char *copy = (char *)malloc(len + 1);
-    if (copy) {
-        memcpy(copy, s, len + 1);
-    }
-    return copy;
-}
 
 Value value_int(int64_t val) {
     Value v;
@@ -36,7 +21,7 @@ Value value_float(double val) {
 Value value_string(const char *s) {
     Value v;
     v.type = VAL_STRING;
-    v.as.s = safe_strdup(s);
+    v.as.s = syllogist_strdup(s);
     return v;
 }
 
@@ -50,7 +35,7 @@ Value value_bool(bool val) {
 Value value_symbol(const char *s) {
     Value v;
     v.type = VAL_SYMBOL;
-    v.as.sym = safe_strdup(s);
+    v.as.sym = syllogist_strdup(s);
     return v;
 }
 
@@ -82,9 +67,9 @@ Value value_clone(const Value *v) {
     }
     Value copy = *v;
     if (v->type == VAL_STRING) {
-        copy.as.s = safe_strdup(v->as.s);
+        copy.as.s = syllogist_strdup(v->as.s);
     } else if (v->type == VAL_SYMBOL) {
-        copy.as.sym = safe_strdup(v->as.sym);
+        copy.as.sym = syllogist_strdup(v->as.sym);
     }
     return copy;
 }
@@ -274,7 +259,7 @@ Fact* wm_assert(WorkingMemory *wm, const char *name, Value val) {
     /* Check if a fact with this name already exists */
     Fact *curr = wm->head;
     while (curr) {
-        if (strcmp(curr->name, name) == 0) {
+        if (curr->name && strcmp(curr->name, name) == 0) {
             value_free(&curr->value);
             curr->value = val;
             curr->timestamp = wm->clock;
@@ -289,7 +274,12 @@ Fact* wm_assert(WorkingMemory *wm, const char *name, Value val) {
         value_free(&val);
         return NULL;
     }
-    new_fact->name = safe_strdup(name);
+    new_fact->name = syllogist_strdup(name);
+    if (!new_fact->name) {
+        value_free(&val);
+        free(new_fact);
+        return NULL;
+    }
     new_fact->value = val;
     new_fact->timestamp = wm->clock;
     new_fact->next = wm->head;
@@ -308,7 +298,7 @@ bool wm_retract(WorkingMemory *wm, const char *name) {
     Fact *curr = wm->head;
     Fact *prev = NULL;
     while (curr) {
-        if (strcmp(curr->name, name) == 0) {
+        if (curr->name && strcmp(curr->name, name) == 0) {
             if (prev) {
                 prev->next = curr->next;
             } else {

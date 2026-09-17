@@ -1,0 +1,59 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake make valgrind
+      - name: Build with CMake (${{ matrix.compiler }})
+        env:
+          CC: ${{ matrix.compiler }}
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build
+      - name: Run CTest
+        run: ctest --test-dir build --output-on-failure
+      - name: Test with AddressSanitizer and UndefinedBehaviorSanitizer (Make)
+        env:
+          CC: ${{ matrix.compiler }}
+        run: |
+          make clean
+          make SANITIZE=1 test
+      - name: Verify CLI demo execution
+        run: ./build/syllogist --demo
+
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake
+        run: cmake -B build -S .
+      - name: Build Debug
+        run: cmake --build build --config Debug
+      - name: Run CTest
+        run: ctest --test-dir build --output-on-failure
+      - name: Verify CLI execution
+        run: .\build\Debug\syllogist.exe --demo
+
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+      - name: Build
+        run: cmake --build build
+      - name: Run CTest
+        run: ctest --test-dir build --output-on-failure
+      - name: Verify CLI execution
+        run: ./build/syllogist --demo

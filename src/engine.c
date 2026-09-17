@@ -1,23 +1,8 @@
 #include "engine.h"
+#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-static char *safe_strdup(const char *s) {
-    if (!s) {
-        char *empty = (char *)malloc(1);
-        if (empty) {
-            empty[0] = '\0';
-        }
-        return empty;
-    }
-    size_t len = strlen(s);
-    char *copy = (char *)malloc(len + 1);
-    if (copy) {
-        memcpy(copy, s, len + 1);
-    }
-    return copy;
-}
 
 const char* conflict_strategy_to_string(ConflictStrategy s) {
     switch (s) {
@@ -57,7 +42,11 @@ static void update_firing_record(Engine *e, const char *rule_name, uint64_t fire
     if (!new_rec) {
         return;
     }
-    new_rec->rule_name = safe_strdup(rule_name);
+    new_rec->rule_name = syllogist_strdup(rule_name);
+    if (!new_rec->rule_name) {
+        free(new_rec);
+        return;
+    }
     new_rec->has_fired = true;
     new_rec->last_fired_timestamp = fired_ts;
     new_rec->next = e->firing_history;
@@ -283,3 +272,21 @@ void engine_dump(const Engine *e, FILE *out) {
     }
     fputs("===================================================\n", out);
 }
+
+bool engine_is_rule_refracted(const Engine *e, const char *rule_name, uint64_t match_ts) {
+    if (!e || !rule_name) {
+        return false;
+    }
+    const RuleFiringRecord *rec = find_firing_record(e, rule_name);
+    if (!rec || !rec->has_fired) {
+        return false;
+    }
+    return match_ts <= rec->last_fired_timestamp;
+}
+
+bool engine_rule_beats(const Rule *cand, size_t cand_order, uint64_t cand_ts,
+                       const Rule *best, size_t best_order, uint64_t best_ts,
+                       ConflictStrategy strategy) {
+    return candidate_beats_best(cand, cand_order, cand_ts, best, best_order, best_ts, strategy);
+}
+

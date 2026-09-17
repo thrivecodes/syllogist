@@ -32,5 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cross-Platform Build & Zero-Dependency Test Suite**:
   - Root `CMakeLists.txt` supporting Windows MSVC, GCC, and Clang with CTest.
   - POSIX `Makefile` supporting `DEBUG=1` and `SANITIZE=1` flags.
-  - Dependency-free unit test runner (`tests/test_runner.h`) with 35 comprehensive test cases across `test_fact.c`, `test_rule.c`, and `test_engine.c`.
+  - Dependency-free unit test runner (`tests/test_runner.h`) with comprehensive test cases across `test_fact.c`, `test_rule.c`, and `test_engine.c`.
   - Clean `.gitignore` ignoring temporary compilation, test, and IDE artifacts.
+- **Enterprise Hardening & CI/CD**:
+  - Centralized string utility (`src/util.h`, `src/util.c`) eliminating code duplication.
+  - Comprehensive out-of-memory (OOM) guards across all entity allocators.
+  - Public engine inspection API (`engine_is_rule_refracted`, `engine_rule_beats`) eliminating encapsulation leakage.
+  - GitHub Actions multi-platform matrix CI workflow (`.github/workflows/ci.yml`) validating Ubuntu (GCC/Clang, ASan/UBSan), macOS, and Windows.

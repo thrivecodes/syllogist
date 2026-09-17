@@ -1,22 +1,7 @@
 #include "rule.h"
+#include "util.h"
 #include <stdlib.h>
 #include <string.h>
-
-static char *safe_strdup(const char *s) {
-    if (!s) {
-        char *empty = (char *)malloc(1);
-        if (empty) {
-            empty[0] = '\0';
-        }
-        return empty;
-    }
-    size_t len = strlen(s);
-    char *copy = (char *)malloc(len + 1);
-    if (copy) {
-        memcpy(copy, s, len + 1);
-    }
-    return copy;
-}
 
 const char* operator_to_string(Operator op) {
     switch (op) {
@@ -37,7 +22,12 @@ Condition* condition_create(const char *fact_name, Operator op, Value target_val
         value_free(&target_val);
         return NULL;
     }
-    c->fact_name = safe_strdup(fact_name);
+    c->fact_name = syllogist_strdup(fact_name);
+    if (!c->fact_name) {
+        value_free(&target_val);
+        free(c);
+        return NULL;
+    }
     c->op = op;
     c->target_val = target_val;
     c->next = NULL;
@@ -109,7 +99,12 @@ Action* action_create(ActionType type, const char *target_name, Value arg_val) {
         return NULL;
     }
     a->type = type;
-    a->target_name = safe_strdup(target_name);
+    a->target_name = syllogist_strdup(target_name);
+    if (!a->target_name) {
+        value_free(&arg_val);
+        free(a);
+        return NULL;
+    }
     a->arg_val = arg_val;
     a->next = NULL;
     return a;
@@ -130,7 +125,11 @@ Rule* rule_create(const char *name, int salience) {
     if (!r) {
         return NULL;
     }
-    r->name = safe_strdup(name);
+    r->name = syllogist_strdup(name);
+    if (!r->name) {
+        free(r);
+        return NULL;
+    }
     r->salience = salience;
     r->conditions = NULL;
     r->condition_count = 0;

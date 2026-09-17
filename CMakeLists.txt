@@ -11,6 +11,7 @@ add_library(syllogist_core STATIC
     src/rule.c
     src/engine.c
     src/io.c
+    src/util.c
 )
 
 target_include_directories(syllogist_core PUBLIC

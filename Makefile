@@ -25,8 +25,8 @@ TEST_DIR = tests
 BUILD_DIR = build
 BIN_DIR = bin
 
-CORE_SRCS = $(SRC_DIR)/fact.c $(SRC_DIR)/rule.c $(SRC_DIR)/engine.c $(SRC_DIR)/io.c
-CORE_OBJS = $(BUILD_DIR)/fact.o $(BUILD_DIR)/rule.o $(BUILD_DIR)/engine.o $(BUILD_DIR)/io.o
+CORE_SRCS = $(SRC_DIR)/fact.c $(SRC_DIR)/rule.c $(SRC_DIR)/engine.c $(SRC_DIR)/io.c $(SRC_DIR)/util.c
+CORE_OBJS = $(BUILD_DIR)/fact.o $(BUILD_DIR)/rule.o $(BUILD_DIR)/engine.o $(BUILD_DIR)/io.o $(BUILD_DIR)/util.o
 LIB_CORE = $(BUILD_DIR)/libsyllogist_core.a
 
 MAIN_SRC = $(SRC_DIR)/main.c

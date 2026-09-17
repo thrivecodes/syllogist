@@ -1,23 +1,9 @@
 #include "io.h"
+#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-static char *safe_strdup(const char *s) {
-    if (!s) {
-        char *empty = (char *)malloc(1);
-        if (empty) {
-            empty[0] = '\0';
-        }
-        return empty;
-    }
-    size_t len = strlen(s);
-    char *copy = (char *)malloc(len + 1);
-    if (copy) {
-        memcpy(copy, s, len + 1);
-    }
-    return copy;
-}
 
 void io_console_action_sink(const char *action, const Value *val, void *user_data) {
     (void)user_data;
@@ -66,7 +52,11 @@ bool io_mock_action_sink(const char *action, const Value *val, void *user_data) 
     if (!ma) {
         return false;
     }
-    ma->name = safe_strdup(action);
+    ma->name = syllogist_strdup(action);
+    if (!ma->name) {
+        free(ma);
+        return false;
+    }
     ma->arg = val ? value_clone(val) : value_none();
     ma->next = NULL;
 

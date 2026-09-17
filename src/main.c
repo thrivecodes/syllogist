@@ -85,50 +85,6 @@ static bool cli_action_sink(const char *action_name, const Value *arg, void *use
     return true;
 }
 
-/* Check if a rule has already fired for current fact timestamps (refraction) */
-static bool is_rule_refracted(const Engine *e, const char *rule_name, uint64_t match_ts) {
-    if (!e || !rule_name) {
-        return false;
-    }
-    const RuleFiringRecord *rec = e->firing_history;
-    while (rec) {
-        if (rec->rule_name && strcmp(rec->rule_name, rule_name) == 0) {
-            if (rec->has_fired && match_ts <= rec->last_fired_timestamp) {
-                return true;
-            }
-            return false;
-        }
-        rec = rec->next;
-    }
-    return false;
-}
-
-/* Compare two eligible candidate rules under given conflict strategy */
-static bool candidate_beats(const Rule *cand, size_t cand_order, uint64_t cand_ts,
-                            const Rule *best, size_t best_order, uint64_t best_ts,
-                            ConflictStrategy strategy) {
-    switch (strategy) {
-        case STRATEGY_ORDER:
-            return cand_order < best_order;
-        case STRATEGY_SPECIFICITY:
-            if (cand->condition_count > best->condition_count) return true;
-            if (cand->condition_count < best->condition_count) return false;
-            return cand_order < best_order;
-        case STRATEGY_RECENCY:
-            if (cand_ts > best_ts) return true;
-            if (cand_ts < best_ts) return false;
-            if (cand->condition_count > best->condition_count) return true;
-            if (cand->condition_count < best->condition_count) return false;
-            return cand_order < best_order;
-        case STRATEGY_SALIENCE:
-            if (cand->salience > best->salience) return true;
-            if (cand->salience < best->salience) return false;
-            return cand_order < best_order;
-        default:
-            return cand_order < best_order;
-    }
-}
-
 /* Print rule representation */
 static void print_rule_summary(const Rule *r, size_t idx) {
     printf("  [Rule %zu] \"%s\" (salience: %d)\n", idx, r->name ? r->name : "unnamed", r->salience);
@@ -247,15 +203,15 @@ static int run_worked_example(ConflictStrategy strategy, const char *rule_file_p
             bool matches = rule_matches(curr, &engine.wm, &match_ts);
             if (!matches) {
                 printf("    - Rule \"%s\": NO MATCH (conditions not met)\n", curr->name);
-            } else if (is_rule_refracted(&engine, curr->name, match_ts)) {
+            } else if (engine_is_rule_refracted(&engine, curr->name, match_ts)) {
                 printf("    - Rule \"%s\": REFRACTED (already fired for fact tick %llu)\n",
                        curr->name, (unsigned long long)match_ts);
             } else {
                 printf("    - Rule \"%s\": MATCH (eligible, max fact tick: %llu)\n",
                        curr->name, (unsigned long long)match_ts);
-                if (!agenda_best || candidate_beats(curr, order, match_ts,
-                                                    agenda_best, best_order, best_ts,
-                                                    strategy)) {
+                if (!agenda_best || engine_rule_beats(curr, order, match_ts,
+                                                      agenda_best, best_order, best_ts,
+                                                      strategy)) {
                     agenda_best = curr;
                     best_order = order;
                     best_ts = match_ts;

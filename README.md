@@ -25,11 +25,18 @@ Early development. Core data structures and the naive forward-chaining loop are 
 
 The engine runs a classic **match → resolve → act** cycle:
 
-```mermaid
-flowchart LR
-    WM[Working Memory<br/>facts] -->|match| AG[Agenda<br/>eligible rules]
-    AG -->|resolve<br/>conflict strategy| R[Selected Rule]
-    R -->|act: assert/retract facts<br/>or trigger action| WM
+```text
+  +------------------+     match       +------------------+
+  |  Working Memory  | --------------> |      Agenda      |
+  |     (facts)      |                 | (eligible rules) |
+  +------------------+                 +------------------+
+           ^                                     |
+           |                                     | resolve
+           |                                     | (conflict strategy)
+           |                                     v
+           |    act: assert/retract facts  +------------------+
+           +------------------------------ |  Selected Rule   |
+                or trigger action          +------------------+
 ```
 
 1. **Match** — scan the rule base, find every rule whose conditions are fully satisfied by current working memory

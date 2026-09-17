@@ -1,0 +1,30 @@
+# ==============================================================================
+# Syllogist Sample Rule Base: Smart Thermostat & Environmental Control
+# ==============================================================================
+# This file showcases sample rules based on the Syllogist rule language grammar:
+#   rule          := "IF" condition_list "THEN" action_list
+#   condition     := IDENTIFIER OPERATOR value
+#   condition_list:= condition ("AND" condition)*
+#   action        := IDENTIFIER "(" [value] ")"
+#   action_list   := action ("," action)*
+#   operator      := ">" | "<" | ">=" | "<=" | "==" | "!="
+#   value         := NUMBER | STRING | BOOLEAN | IDENTIFIER
+# ==============================================================================
+
+# Rule 1: High temperature threshold detection
+# When the room temperature exceeds 30 degrees Celsius, assert an internal
+# overheat risk flag into working memory.
+IF temperature > 30 THEN assert(overheat_risk, true)
+
+# Rule 2: Compound hazard detection (overheat + low humidity)
+# When an overheat risk is flagged and ambient humidity drops below 50%,
+# trigger a dry heat warning alert action.
+IF overheat_risk == true AND humidity < 50 THEN alert("dry_heat_warning")
+
+# Rule 3: Low temperature threshold detection
+# If temperature drops below 18 degrees Celsius, dispatch a freeze risk alert.
+IF temperature < 18 THEN alert("freeze_risk")
+
+# Rule 4: Occupancy and ambient lighting automation
+# When motion is detected and the current time of day is night, activate lighting.
+IF motion_detected == true AND time_of_day == "night" THEN turn_on("light")

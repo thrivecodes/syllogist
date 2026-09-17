@@ -160,12 +160,12 @@ Unit tests live in `tests/`, one file per module (`test_fact.c`, `test_engine.c`
 
 ## Roadmap
 
-- [ ] Fact / working memory data structures
-- [ ] Naive forward-chaining engine (match-resolve-act)
-- [ ] Conflict resolution strategies (order / specificity / recency)
+- [x] Fact / working memory data structures
+- [x] Naive forward-chaining engine (match-resolve-act)
+- [x] Conflict resolution strategies (order / specificity / recency)
 - [ ] Backward chaining (goal-driven queries)
 - [ ] Text-based rule language + parser
-- [ ] Pluggable I/O boundary with a stub sensor/actuator test harness
+- [x] Pluggable I/O boundary with a stub sensor/actuator test harness
 - [ ] Hardware integration — real GPIO/sensor input on an embedded target
 - [ ] `OR` conditions and parenthesized grouping in the rule language
 - [ ] Rete-style incremental matching (avoid re-scanning all rules every cycle)

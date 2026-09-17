@@ -39,3 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive out-of-memory (OOM) guards across all entity allocators.
   - Public engine inspection API (`engine_is_rule_refracted`, `engine_rule_beats`) eliminating encapsulation leakage.
   - GitHub Actions multi-platform matrix CI workflow (`.github/workflows/ci.yml`) validating Ubuntu (GCC/Clang, ASan/UBSan), macOS, and Windows.
+- **Community Governance & Licensing**:
+  - Official MIT License (`LICENSE`).
+  - Repository code ownership (`.github/CODEOWNERS`) assigned to `@thrive-spectrexq`.
+  - Issue templates (`bug_report.md`, `feature_request.md`), pull request template, security policy (`SECURITY.md`), and Dependabot configuration (`dependabot.yml`).
